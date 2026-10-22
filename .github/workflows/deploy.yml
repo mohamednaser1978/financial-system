@@ -14,14 +14,13 @@ jobs:
       - name: 🚚 Get latest code
         uses: actions/checkout@v4
 
-      - name: ⚙️ Use Node.js 20
+      - name: ⚙️ Use Node.js 22
         uses: actions/setup-node@v4
         with:
-          node-version: 20
-          cache: 'npm'
+          node-version: 22
 
       - name: 📦 Install dependencies
-        run: npm install --legacy-peer-deps
+        run: npm install --legacy-peer-deps --force
 
       - name: 🏗️ Build production files (Static Export)
         run: npx next build && node scripts/prepare-export.cjs
