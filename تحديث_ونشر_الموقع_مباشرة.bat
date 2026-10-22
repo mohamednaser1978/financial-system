@@ -10,6 +10,7 @@ cd /d "%~dp0"
 
 echo [1/3] جاري تصدير واجهة الموقع (Next.js Export)...
 set NEXT_PUBLIC_BASE_PATH=/financial-system
+set NEXT_PUBLIC_API_URL=https://api.top1.ly
 call npx next build
 
 if %ERRORLEVEL% NEQ 0 (

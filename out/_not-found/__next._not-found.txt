@@ -2,4 +2,4 @@
 2:I[39756,["/financial-system/assets/static/chunks/11wvay.l3e1_p.js","/financial-system/assets/static/chunks/0dbhjjzl8qfwv.js","/financial-system/assets/static/chunks/0w3e~n636~81m.js"],"default"]
 3:I[37457,["/financial-system/assets/static/chunks/11wvay.l3e1_p.js","/financial-system/assets/static/chunks/0dbhjjzl8qfwv.js","/financial-system/assets/static/chunks/0w3e~n636~81m.js"],"default"]
 4:[]
-0:{"rsc":["$","$1","c",{"children":[null,["$","$L2",null,{"parallelRouterKey":"children","template":["$","$L3",null,{}]}]]}],"isPartial":false,"staleTime":300,"varyParams":"$W4","buildId":"pdA_sEhlV696w1mEY0bw2"}
+0:{"rsc":["$","$1","c",{"children":[null,["$","$L2",null,{"parallelRouterKey":"children","template":["$","$L3",null,{}]}]]}],"isPartial":false,"staleTime":300,"varyParams":"$W4","buildId":"5KjXwKOwSgJQpMYVtxs7G"}
