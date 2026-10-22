@@ -4,7 +4,9 @@ from sqlalchemy.orm import sessionmaker
 import os
 
 # SQLite database file path
-DATABASE_PATH = os.environ.get("DATABASE_PATH", "./dev.db")
+_backend_dir = os.path.dirname(os.path.abspath(__file__))
+_default_db = os.path.join(_backend_dir, "dev.db")
+DATABASE_PATH = os.environ.get("DATABASE_PATH", _default_db)
 
 # Normalize: convert backslashes to forward slashes (required for SQLAlchemy URL)
 DATABASE_PATH = DATABASE_PATH.replace("\\", "/")
