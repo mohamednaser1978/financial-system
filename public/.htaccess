@@ -1,0 +1,33 @@
+# Allow public access
+<IfModule mod_authz_core.c>
+  Require all granted
+</IfModule>
+
+<FilesMatch ".*">
+  <IfModule mod_authz_core.c>
+    Require all granted
+  </IfModule>
+</FilesMatch>
+
+# Ensure proper MIME types
+<IfModule mod_mime.c>
+  AddType text/css .css
+  AddType application/javascript .js
+  AddType image/svg+xml .svg
+  AddType font/woff .woff
+  AddType font/woff2 .woff2
+</IfModule>
+
+# SPA Routing & Override parent rules
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteBase /financial-system/
+
+  # If file or folder exists, serve directly
+  RewriteCond %{REQUEST_FILENAME} -f [OR]
+  RewriteCond %{REQUEST_FILENAME} -d
+  RewriteRule ^ - [L]
+
+  # Otherwise fallback to index.html
+  RewriteRule ^ index.html [L]
+</IfModule>
