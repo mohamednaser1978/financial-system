@@ -14,6 +14,7 @@ binaries/
 temp_extract/
 temp_node_bin/
 scratch/
+*.zip
 
 # Python
 __pycache__/
