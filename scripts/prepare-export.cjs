@@ -18,8 +18,16 @@ function replaceInDir(dir) {
       replaceInDir(fullPath);
     } else if (/\.(html|js|css|json|txt)$/i.test(file)) {
       let content = fs.readFileSync(fullPath, 'utf8');
+      let changed = false;
       if (content.includes('/_next/')) {
         content = content.replace(/\/_next\//g, '/assets/');
+        changed = true;
+      }
+      if (content.includes('"/icon.png"')) {
+        content = content.replace(/"\/icon\.png"/g, '"/financial-system/icon.png"');
+        changed = true;
+      }
+      if (changed) {
         fs.writeFileSync(fullPath, content, 'utf8');
       }
     }

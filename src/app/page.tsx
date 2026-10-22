@@ -189,6 +189,12 @@ const API_BASE =
     ? 'https://api.top1.ly'
     : (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000')
 
+const getAssetPath = (path: string) => {
+  const base = process.env.NEXT_PUBLIC_BASE_PATH || (typeof window !== 'undefined' && window.location.pathname.startsWith('/financial-system') ? '/financial-system' : '')
+  if (base && path.startsWith(base)) return path
+  return `${base}${path.startsWith('/') ? path : '/' + path}`
+}
+
 const formatMoney = (amount: number | undefined | null) => {
   const val = typeof amount === 'number' ? amount : 0
   const formatted = new Intl.NumberFormat('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(val)
@@ -322,7 +328,7 @@ export default function FinanceApp() {
           <div className="p-4 border-b border-[var(--sidebar-border)]">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center shrink-0 overflow-hidden">
-                <img src="/icon.png" alt="Logo" className="w-full h-full object-contain p-1" />
+                <img src={getAssetPath('/icon.png')} alt="Logo" className="w-full h-full object-contain p-1" />
               </div>
               <div className="min-w-0">
                 <h2 className="font-bold text-sm leading-tight truncate">{companyName}</h2>
@@ -663,7 +669,7 @@ function LoginScreen({ onLogin, loading }: { onLogin: (u: string, p: string) => 
         <div className="w-full max-w-md">
           <div className="md:hidden text-center mb-8">
             <div className="w-20 h-20 bg-blue-600/10 rounded-2xl flex items-center justify-center mx-auto mb-4 overflow-hidden shadow-inner">
-              <img src="/icon.png" alt="Logo" className="w-full h-full object-contain p-2" />
+              <img src={getAssetPath('/icon.png')} alt="Logo" className="w-full h-full object-contain p-2" />
             </div>
             <h1 className="text-2xl font-bold text-gray-900">نظام إدارة التحويلات</h1>
           </div>
@@ -717,7 +723,7 @@ function LoginScreen({ onLogin, loading }: { onLogin: (u: string, p: string) => 
       <div className="hidden md:flex flex-1 login-split-gradient items-center justify-center p-12 relative animate-blur-in">
         <div className="relative z-20 text-center max-w-lg">
           <div className="w-64 h-64 bg-white/10 backdrop-blur-xl rounded-[3rem] flex items-center justify-center mx-auto mb-10 overflow-hidden shadow-2xl border border-white/20 transform hover:scale-105 transition-transform duration-700">
-            <img src="/icon.png" alt="Institutional Logo" className="w-full h-full object-contain p-8" />
+            <img src={getAssetPath('/icon.png')} alt="Institutional Logo" className="w-full h-full object-contain p-8" />
           </div>
           <h2 className="text-4xl font-black text-white mb-6 leading-tight drop-shadow-lg">
             نظام إدارة التحويلات المالية
