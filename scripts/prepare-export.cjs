@@ -23,6 +23,10 @@ function replaceInDir(dir) {
         content = content.replace(/\/_next\//g, '/assets/');
         changed = true;
       }
+      if (content.includes('/financial-system /')) {
+        content = content.replace(/\/financial-system \//g, '/financial-system/');
+        changed = true;
+      }
       if (content.includes('"/icon.png"')) {
         content = content.replace(/"\/icon\.png"/g, '"/financial-system/icon.png"');
         changed = true;

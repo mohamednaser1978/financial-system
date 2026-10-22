@@ -1,2 +1,2 @@
-:HL["/financial-system /assets/static/chunks/0ir59j95~n9_p.css","style"]
-0:{"tree":{"name":"","param":null,"prefetchHints":16,"slots":{"children":{"name":"transfers","param":null,"prefetchHints":0,"slots":{"children":{"name":"between-offices","param":null,"prefetchHints":0,"slots":{"children":{"name":"__PAGE__","param":null,"prefetchHints":0,"slots":null}}}}}}},"staleTime":300,"buildId":"lGW55tlE6dlgdOl-YoJSS"}
+:HL["/financial-system/assets/static/chunks/0ir59j95~n9_p.css","style"]
+0:{"tree":{"name":"","param":null,"prefetchHints":16,"slots":{"children":{"name":"transfers","param":null,"prefetchHints":0,"slots":{"children":{"name":"between-offices","param":null,"prefetchHints":0,"slots":{"children":{"name":"__PAGE__","param":null,"prefetchHints":0,"slots":null}}}}}}},"staleTime":300,"buildId":"d5Ef3NMHhYjaxClomAJWA"}

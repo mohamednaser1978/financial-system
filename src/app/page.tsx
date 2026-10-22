@@ -190,7 +190,8 @@ const API_BASE =
     : (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000')
 
 const getAssetPath = (path: string) => {
-  const base = process.env.NEXT_PUBLIC_BASE_PATH || (typeof window !== 'undefined' && window.location.pathname.startsWith('/financial-system') ? '/financial-system' : '')
+  const rawBase = process.env.NEXT_PUBLIC_BASE_PATH || (typeof window !== 'undefined' && window.location.pathname.startsWith('/financial-system') ? '/financial-system' : '')
+  const base = rawBase.trim()
   if (base && path.startsWith(base)) return path
   return `${base}${path.startsWith('/') ? path : '/' + path}`
 }
