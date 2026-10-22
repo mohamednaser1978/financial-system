@@ -23,7 +23,7 @@ jobs:
         run: npm install --legacy-peer-deps --force
 
       - name: 🏗️ Build production files (Static Export)
-        run: npx next build && node scripts/prepare-export.cjs
+        run: npx next build --webpack && node scripts/prepare-export.cjs
         env:
           NEXT_EXPORT: 'true'
           NEXT_PUBLIC_BASE_PATH: '/financial-system'
