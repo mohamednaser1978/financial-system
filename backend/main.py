@@ -84,21 +84,42 @@ async def log_requests(request: Request, call_next):
     return response
 
 # --- SETTINGS PERSISTENCE ---
-SETTINGS_FILE = "settings.json"
-DEFAULT_SETTINGS = {"companyName": "شركة النجع للحوالات", "backupPath": "backups/", "adminPhone": ""}
+_backend_dir = os.path.dirname(os.path.abspath(__file__))
+_root_dir = os.path.dirname(_backend_dir)
+DEFAULT_SETTINGS = {"companyName": "شركة النجع للحوالات", "backupPath": "backups/", "adminPhone": "0926184452"}
+
+def get_settings_file_path():
+    root_file = os.path.join(_root_dir, "settings.json")
+    if os.path.exists(root_file):
+        return root_file
+    backend_file = os.path.join(_backend_dir, "settings.json")
+    if os.path.exists(backend_file):
+        return backend_file
+    cwd_file = os.path.join(os.getcwd(), "settings.json")
+    if os.path.exists(cwd_file):
+        return cwd_file
+    return root_file if os.path.exists(_root_dir) else backend_file
 
 def load_settings():
-    if os.path.exists(SETTINGS_FILE):
+    settings_path = get_settings_file_path()
+    if os.path.exists(settings_path):
         try:
-            with open(SETTINGS_FILE, "r", encoding="utf-8") as f:
-                return json.load(f)
+            with open(settings_path, "r", encoding="utf-8") as f:
+                data = json.load(f)
+                if not data.get("adminPhone"):
+                    data["adminPhone"] = DEFAULT_SETTINGS["adminPhone"]
+                return data
         except:
             return DEFAULT_SETTINGS
     return DEFAULT_SETTINGS
 
 def save_settings_to_file(settings):
-    with open(SETTINGS_FILE, "w", encoding="utf-8") as f:
-        json.dump(settings, f, ensure_ascii=False, indent=2)
+    settings_path = get_settings_file_path()
+    try:
+        with open(settings_path, "w", encoding="utf-8") as f:
+            json.dump(settings, f, ensure_ascii=False, indent=2)
+    except Exception as e:
+        print(f"Error saving settings to {settings_path}: {e}")
 
 def log_action(db: Session, action: str, entity: str, entity_name: str, description: str, user_id: str = None, user_fullname: str = None, entity_id: str = None):
     try:

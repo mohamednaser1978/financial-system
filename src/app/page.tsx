@@ -254,18 +254,27 @@ export default function FinanceApp() {
   const [loading, setLoading] = useState(false)
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [companyName, setCompanyName] = useState('نظام التحويلات')
-  const [adminPhone, setAdminPhone] = useState('')
+  const [adminPhone, setAdminPhone] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('financial_admin_phone') || '0926184452'
+    }
+    return '0926184452'
+  })
   const [transferType, setTransferType] = useState<{ type: 'creditor' | 'debtor', action: 'send' | 'receive', name: string } | null>(null)
   const { toast } = useToast()
 
-  // جلب اسم الشركة من الإعدادات
+  // جلب اسم الشركة ورقم المدير من الإعدادات
   const loadSettings = async () => {
     try {
       const res = await fetch(`${API_BASE}/settings`)
       if (res.ok) {
         const settings = await res.json()
         if (settings.companyName) setCompanyName(settings.companyName)
-        if (settings.adminPhone) setAdminPhone(settings.adminPhone)
+        const phone = settings.adminPhone || '0926184452'
+        setAdminPhone(phone)
+        if (typeof window !== 'undefined') {
+          localStorage.setItem('financial_admin_phone', phone)
+        }
       }
     } catch { /* ignore */ }
   }
@@ -1477,12 +1486,8 @@ function TransfersScreen({ user, isAdmin, adminPhone }: { user: User; isAdmin: b
   }
 
   const handleShareWhatsApp = (t: Transfer) => {
-    if (!adminPhone) {
-      toast({ title: 'تنبيه', description: 'يرجى ضبط رقم هاتف المدير في الإعدادات أولاً' })
-      return
-    }
-
-    let cleanPhone = adminPhone.replace(/[^\d]/g, '')
+    const effectivePhone = adminPhone || (typeof window !== 'undefined' ? localStorage.getItem('financial_admin_phone') : null) || '0926184452'
+    let cleanPhone = effectivePhone.replace(/[^\d]/g, '')
     if (cleanPhone.startsWith('0')) {
       cleanPhone = '218' + cleanPhone.substring(1)
     } else if (!cleanPhone.startsWith('218')) {
@@ -1490,7 +1495,7 @@ function TransfersScreen({ user, isAdmin, adminPhone }: { user: User; isAdmin: b
     }
 
     const msg = `آلَآسِم👤《 ${t.receiverName || 'غير معروف'}\n` +
-                `آلَهّآtٌفُ 📞《${t.receiverPhone || 'غير معروف'}\n` +
+                `آلَهّآتٌفُ 📞《${t.receiverPhone || 'غير معروف'}\n` +
                 `آلَمًبًلَغُ  💵《${t.amount} د.ل\n` +
                 `آلَمًدٍيَنِه🏙《 ${t.location || t.receiverOffice?.name || 'غير معروف'}\n` +
                 ` المرسل👤《${t.senderName || 'غير معروف'}\n` +
@@ -1827,7 +1832,8 @@ function NewTransferScreen({ user, isAdmin, onCreated, transferType, adminPhone 
     currency: 'سيفا',
     multiplier: '10'
   })
-  const [sendMessageToAdmin, setSendMessageToAdmin] = useState(false)
+  const [sendMessageToAdmin, setSendMessageToAdmin] = useState(true)
+  const [whatsappUrl, setWhatsappUrl] = useState<string | null>(null)
 
   const updateCalculations = (total: string) => {
     const totalVal = parseFloat(total) || 0
@@ -1940,8 +1946,9 @@ function NewTransferScreen({ user, isAdmin, onCreated, transferType, adminPhone 
       if (!res.ok) throw new Error(data.error || 'خطأ')
       
       // WhatsApp Direct Link Logic
-      if (sendMessageToAdmin && adminPhone) {
-        let cleanPhone = adminPhone.replace(/[^\d]/g, '')
+      if (sendMessageToAdmin) {
+        const effectiveAdminPhone = adminPhone || (typeof window !== 'undefined' ? localStorage.getItem('financial_admin_phone') : null) || '0926184452'
+        let cleanPhone = effectiveAdminPhone.replace(/[^\d]/g, '')
         if (cleanPhone.startsWith('0')) {
           cleanPhone = '218' + cleanPhone.substring(1)
         } else if (!cleanPhone.startsWith('218')) {
@@ -1960,7 +1967,14 @@ function NewTransferScreen({ user, isAdmin, onCreated, transferType, adminPhone 
                     `من مكتب ${senderOfficeName}..`
                     
         const waUrl = `https://wa.me/${cleanPhone}?text=${encodeURIComponent(msg)}`
-        window.open(waUrl, '_blank')
+        setWhatsappUrl(waUrl)
+        try {
+          window.open(waUrl, '_blank')
+        } catch {
+          /* Popup blocked by browser - fallback button in modal */
+        }
+      } else {
+        setWhatsappUrl(null)
       }
       
       toast({ title: 'تم بنجاح!', description: `تم إنشاء الحوالة ${data.transferNo}` })
@@ -1974,6 +1988,7 @@ function NewTransferScreen({ user, isAdmin, onCreated, transferType, adminPhone 
   }
 
   const resetAll = () => {
+    setWhatsappUrl(null)
     setForm({ 
       senderOfficeId: user.role === 'branch' ? (user.officeId || '') : '', 
       receiverOfficeId: '', 
@@ -2297,13 +2312,39 @@ function NewTransferScreen({ user, isAdmin, onCreated, transferType, adminPhone 
       {/* Success Modal */}
       {showSuccessModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-300">
-          <div className="bg-white rounded-[24px] shadow-2xl p-8 max-w-sm w-full text-center animate-in zoom-in-95 duration-300">
-            <div className="w-20 h-20 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-6 text-4xl font-black">✓</div>
-            <h2 className="text-2xl font-black text-gray-900 mb-2">تم إنشاء الحوالة بنجاح</h2>
-            <p className="text-gray-400 text-sm mb-6 font-bold">رقم العملية المرجعي:</p>
-            <div className="bg-blue-900 text-white py-3 px-6 rounded-xl font-black text-2xl tracking-widest inline-block mb-6 shadow-lg">{successCode}</div>
-            <p className="text-xs text-gray-400 font-medium mb-8">تم تحديث رصيد المكتب المستلم (+) وخفض رصيد المكتب الدافع (-)</p>
-            <Button className="w-full h-12 bg-gray-900 hover:bg-black text-white font-black" onClick={() => { setShowSuccessModal(false); onCreated() }}>حسناً</Button>
+          <div className="bg-white rounded-[24px] shadow-2xl p-6 sm:p-8 max-w-sm sm:max-w-md w-full text-center animate-in zoom-in-95 duration-300">
+            <div className="w-16 h-16 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-4 text-3xl font-black">✓</div>
+            <h2 className="text-2xl font-black text-gray-900 mb-1">تم إنشاء الحوالة بنجاح</h2>
+            <p className="text-gray-400 text-xs mb-3 font-bold">رقم العملية المرجعي:</p>
+            <div className="bg-blue-900 text-white py-2.5 px-6 rounded-xl font-black text-xl tracking-widest inline-block mb-4 shadow-lg">{successCode}</div>
+            
+            {whatsappUrl && (
+              <div className="mb-5 p-4 rounded-2xl bg-emerald-50 border border-emerald-200 text-right">
+                <div className="flex items-center gap-2 text-emerald-800 font-extrabold text-sm mb-1.5">
+                  <span className="text-lg">📲</span>
+                  <span>إشعار واتساب لمدير النظام:</span>
+                </div>
+                <p className="text-xs text-emerald-700 font-medium mb-3">
+                  إذا لم تفتح نافذة الواتساب تلقائياً بسبب حظر النوافذ المنبثقة بالمتصفح، اضغط هنا للإرسال المباشر:
+                </p>
+                <a
+                  href={whatsappUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center justify-center gap-2 w-full py-3 px-4 bg-emerald-600 hover:bg-emerald-700 active:scale-[0.98] text-white font-black rounded-xl shadow-md transition-all text-sm"
+                >
+                  <svg className="w-5 h-5 fill-current" viewBox="0 0 24 24">
+                    <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+                  </svg>
+                  إرسال الرسالة عبر واتساب الآن 📲
+                </a>
+              </div>
+            )}
+
+            <p className="text-xs text-gray-400 font-medium mb-6">تم تحديث رصيد المكتب المستلم (+) وخفض رصيد المكتب الدافع (-)</p>
+            <Button className="w-full h-12 bg-gray-900 hover:bg-black text-white font-black" onClick={() => { setShowSuccessModal(false); setWhatsappUrl(null); onCreated() }}>
+              إتمام والعودة للحوالات
+            </Button>
           </div>
         </div>
       )}
@@ -4097,7 +4138,8 @@ function SettingsScreen({ user, isAdmin }: { user: User; isAdmin: boolean }) {
     const settings = await settingsRes.json()
     setCompanyName(settings.companyName || '')
     setBackupPath(settings.backupPath || '')
-    setAdminPhone(settings.adminPhone || '')
+    const phone = settings.adminPhone || (typeof window !== 'undefined' ? localStorage.getItem('financial_admin_phone') : null) || '0926184452'
+    setAdminPhone(phone)
     setLoading(false)
   }
 
@@ -4115,7 +4157,8 @@ function SettingsScreen({ user, isAdmin }: { user: User; isAdmin: boolean }) {
         setOffices(await officesRes.json())
         setCompanyName(settings.companyName || '')
         setBackupPath(settings.backupPath || '')
-        setAdminPhone(settings.adminPhone || '')
+        const phone = settings.adminPhone || (typeof window !== 'undefined' ? localStorage.getItem('financial_admin_phone') : null) || '0926184452'
+        setAdminPhone(phone)
       }
       if (!cancelled) setLoading(false)
     }
@@ -4132,6 +4175,9 @@ function SettingsScreen({ user, isAdmin }: { user: User; isAdmin: boolean }) {
         body: JSON.stringify({ companyName, backupPath, adminPhone, userId: user.id, userFullName: user.fullName }),
       })
       if (res.ok) {
+        if (typeof window !== 'undefined' && adminPhone) {
+          localStorage.setItem('financial_admin_phone', adminPhone)
+        }
         toast({ title: '✅ تم الحفظ', description: 'تم حفظ إعدادات الشركة بنجاح' })
       } else {
         toast({ title: 'خطأ', description: 'فشل في حفظ الإعدادات', variant: 'destructive' })
