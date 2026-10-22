@@ -5,7 +5,6 @@ node_modules/
 
 # Next.js Build
 .next/
-out/
 build/
 dist/
 dist_standalone/

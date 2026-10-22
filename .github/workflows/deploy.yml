@@ -8,30 +8,11 @@ on:
 
 jobs:
   web-deploy:
-    name: Build and Deploy to cPanel
-    runs-on: windows-latest
+    name: Deploy to cPanel
+    runs-on: ubuntu-latest
     steps:
       - name: 🚚 Get latest code
         uses: actions/checkout@v4
-
-      - name: ⚙️ Use Node.js 22
-        uses: actions/setup-node@v4
-        with:
-          node-version: 22
-
-      - name: 📦 Install dependencies
-        run: npm install --legacy-peer-deps --force
-
-      - name: 🏗️ Build production files (Static Export)
-        run: npx next build --debug
-        env:
-          NEXT_PUBLIC_BASE_PATH: '/financial-system'
-          NEXT_PUBLIC_API_URL: ${{ secrets.NEXT_PUBLIC_API_URL || 'https://api.top1.ly' }}
-          PRISMA_GENERATE_SKIP_AUTOINSTALL: 'true'
-          NODE_OPTIONS: '--max-old-space-size=4096'
-
-      - name: 📦 Prepare assets for cPanel
-        run: node scripts/prepare-export.cjs
 
       - name: 🚀 Sync files to cPanel via FTP
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
@@ -42,5 +23,6 @@ jobs:
           protocol: ftp
           port: 21
           local-dir: ./out/
-          server-dir: ./financial-system/
+          server-dir: ./
           dangerous-clean-slate: false
+
