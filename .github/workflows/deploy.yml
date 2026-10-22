@@ -28,6 +28,8 @@ jobs:
           NEXT_EXPORT: 'true'
           NEXT_PUBLIC_BASE_PATH: '/financial-system'
           NEXT_PUBLIC_API_URL: ${{ secrets.NEXT_PUBLIC_API_URL || 'https://api.top1.ly' }}
+          PRISMA_GENERATE_SKIP_AUTOINSTALL: 'true'
+          NODE_OPTIONS: '--max-old-space-size=4096'
 
       - name: 🚀 Sync files to cPanel via FTP
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
